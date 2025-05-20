@@ -1,0 +1,19 @@
+{
+  "scan_root": "C:/Users/Asus/Documents/N.O.V.A/data",
+  "model_name": "tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf",
+  "model_path": "models/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf",
+  "embedding_model": "all-MiniLM-L6-v2",
+  "file_types": [".txt", ".xlsx"],
+  "max_chunk_size": 512,
+  "context_window": 2048,
+  "vector_db_path": "db/vector_store",
+  "metadata_db_path": "db/metadata_store.db",
+  "log_dir": "logs",
+  "watch_files": true,
+  "llm_backend": "llamacpp",
+  "llm_cpp_bin": "llama.cpp/main",
+  "llm_cpp_threads": 4,
+  "llm_cpp_n_ctx": 2048,
+  "embed_model": "sentence-transformers/all-MiniLM-L6-v2",
+  "top_k_results": 5
+}

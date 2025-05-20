@@ -8,26 +8,25 @@ def _paths(db_path: str):
     return db_path + ".index", db_path + ".pkl"
 
 
-def search_db(query_vector: np.ndarray, db_path: str, top_k: int = 4) -> list[str]:
-    index_path, texts_path = _paths(db_path)
+def search_db(query_vector, db_path, return_scores=False, top_k=4):
+    import faiss
+    import pickle
+    import numpy as np
 
-    if not os.path.exists(index_path):
-        print("[ERROR] FAISS index not found.")
-        return []
-
-    index = faiss.read_index(index_path)
-    with open(texts_path, "rb") as f:
+    index = faiss.read_index(f"{db_path}/vector_store.index")
+    with open(f"{db_path}/vector_store.pkl", "rb") as f:
         texts = pickle.load(f)
 
-    query_vector = np.array([query_vector]).astype("float32")
-    distances, indices = index.search(query_vector, top_k)
+    distances, indices = index.search(np.array([query_vector]).astype("float32"), top_k)
 
     results = []
-    for i, dist in zip(indices[0], distances[0]):
-        if i < len(texts):
-            print(f"[DEBUG] Match index {i}, score: {dist:.4f}")
-            results.append(texts[i])
-        else:
-            print(f"[WARN] Ignored index {i} (out of bounds)")
+    for i, idx in enumerate(indices[0]):
+        if idx < len(texts):
+            text = texts[idx]
+            score = distances[0][i]
+            if return_scores:
+                results.append((text, score))
+            else:
+                results.append(text)
 
     return results

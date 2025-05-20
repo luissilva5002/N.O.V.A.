@@ -6,7 +6,7 @@
   "file_types": [".txt", ".xlsx"],
   "max_chunk_size": 512,
   "context_window": 2048,
-  "vector_db_path": "db/vector_store",
+  "vector_db_path": "db",
   "metadata_db_path": "db/metadata_store.db",
   "log_dir": "logs",
   "watch_files": true,

@@ -16,7 +16,7 @@ def get_llm(model_path: str = "models/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf"):
         )
     return _llm
 
-def format_prompt(question: str, context_chunks: list[str]) -> str:
+def format_context_prompt(question: str, context_chunks: list[str]) -> str:
     context = "\n\n".join(chunk.strip() for chunk in context_chunks if chunk.strip())
     return f"""You are N.O.V.A., an intelligent assistant.
 
@@ -28,20 +28,35 @@ Context:
 Question: {question}
 Answer:"""
 
+def format_general_prompt(question: str) -> str:
+    return f"""You are N.O.V.A., an intelligent assistant.
+
+You don't have any relevant context for this question, so answer it using your general knowledge.
+
+Question: {question}
+Answer:"""
+
 def chat_with_context(question: str, db_path: str, model_path: str) -> str:
     llm = get_llm(model_path)
 
     query_vec = embed_text(question)
-    context_chunks = search_db(query_vec, db_path)
+    results = search_db(query_vec, db_path, return_scores=True)
 
-    if not context_chunks:
-        return "I couldn't find any relevant information to answer that."
+    context_chunks = [doc for doc, _ in results]
+    scores = [score for _, score in results]
 
-    print("\n[DEBUG] Retrieved context:")
-    for i, chunk in enumerate(context_chunks):
-        print(f"\n--- Chunk {i+1} ---\n{chunk.strip()}\n")
+    print("[DEBUG] Similarity scores:", scores)
 
-    prompt = format_prompt(question, context_chunks)
+    # Check if all context matches are too dissimilar (higher score = less relevant)
+    threshold = 1.2
+    context_is_relevant = any(score < threshold for score in scores)
+
+    if context_is_relevant and context_chunks:
+        prompt = format_context_prompt(question, context_chunks)
+    else:
+        print("[DEBUG] No relevant context found. Falling back to general knowledge.")
+        prompt = format_general_prompt(question)
+
     print("\n[DEBUG] Prompt being sent to LLM:\n", prompt[:500], "..." if len(prompt) > 500 else "")
 
     output = llm(prompt, max_tokens=256, stop=["User:", "\n\n"])

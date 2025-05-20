@@ -34,7 +34,6 @@ def ingest_documents(folder_path: str, save_path: str = "data/vector_dbs/tennis_
         return
 
     print(f"[INFO] Ingesting {len(texts)} chunks from {len(metadata)} documents...")
-    print("[DEBUG] First chunk preview:\n", texts[0][:300])
 
     # Create embeddings
     embeddings = embed_text(texts)  # Should return list/array of vectors
@@ -46,7 +45,10 @@ def ingest_documents(folder_path: str, save_path: str = "data/vector_dbs/tennis_
     index.add(embeddings)
 
     # Ensure save directory exists
-    os.makedirs(os.path.dirname(save_path), exist_ok=True)
+    save_dir = os.path.dirname(save_path)
+    if save_dir:  # Only try to create the directory if there's a path
+        os.makedirs(save_dir, exist_ok=True)
+
 
     # Save vector index and associated text chunks
     faiss.write_index(index, save_path + ".index")

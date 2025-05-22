@@ -9,9 +9,6 @@ def _paths(db_path: str):
 
 
 def search_db(query_vector, db_path, return_scores=False, top_k=4):
-    import faiss
-    import pickle
-    import numpy as np
 
     index = faiss.read_index(f"{db_path}/vector_store.index")
     with open(f"{db_path}/vector_store.pkl", "rb") as f:

@@ -1,14 +1,29 @@
+import os
+import sys
+import subprocess
 import json
-from nova.vector.ingest import ingest_documents
-from nova.scripts.chat import chat_with_context
 
+REQUIREMENTS_FILE = "requirements.txt"
 SETTINGS_FILE = "settings.json"
 
-def load_settings(path):
-    with open(path, "r") as f:
-        return json.load(f)
+# Step 1: Ensure all dependencies are installed
+def install_requirements():
+    try:
+        import llama_cpp  # test an important package
+    except ImportError:
+        print(">> Installing requirements...")
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "--upgrade", "pip"])
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", REQUIREMENTS_FILE])
 
-def main():
+# Step 2: Load assistant modules AFTER installation
+def run_nova():
+    from nova.vector.ingest import ingest_documents
+    from nova.scripts.chat import chat_with_context
+
+    def load_settings(path):
+        with open(path, "r") as f:
+            return json.load(f)
+
     settings = load_settings(SETTINGS_FILE)
 
     documents_path = settings["scan_root"]
@@ -27,4 +42,5 @@ def main():
         print(f"\nN.O.V.A.: {answer}")
 
 if __name__ == "__main__":
-    main()
+    install_requirements()
+    run_nova()
